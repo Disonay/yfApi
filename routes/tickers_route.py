@@ -12,21 +12,21 @@ router = APIRouter(prefix="/tickers", tags=["tickers"])
 
 def process_ticker_info(ticker_name: str, ticker_data: yf.Ticker, period: str, interval: str) -> dict:
     institutional_holders = ticker_data.institutional_holders
+    if (isinstance(institutional_holders, pd.DataFrame)
+            and len(institutional_holders.columns) == VALID_INVESTORS_COLUMN_COUNT):
+        institutional_holders = institutional_holders.to_dict(orient="records")
+    else:
+        institutional_holders = []
+
+    quotes = ticker_data.history(
+        period=period,
+        interval=interval,
+    ).reset_index().to_dict(orient="records")
 
     return {
         "ticker": ticker_name,
-        "quotes": ticker_data.history(
-            period=period,
-            interval=interval,
-        )
-        .reset_index()
-        .to_dict(orient="records"),
-        "institutional_holders": institutional_holders.to_dict(orient="records")
-        if (
-            isinstance(institutional_holders, pd.DataFrame)
-            and len(institutional_holders.columns) == VALID_INVESTORS_COLUMN_COUNT
-        )
-        else [],
+        "quotes": quotes,
+        "institutional_holders": institutional_holders,
     }
 
 

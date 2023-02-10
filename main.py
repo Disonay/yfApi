@@ -7,6 +7,6 @@ app = FastAPI()
 app.include_router(tickers_route.router)
 
 
-@app.get("/")
-async def root():
-    return {"Python API to get some information about companies traded on the exchange"}
+@app.get("/health")
+async def root() -> bool:
+    return True
